@@ -143,15 +143,22 @@ if not models_ready:
 
 # ── Load models
 try:
-   import joblib
 
-MODEL_PATH = "model.pkl"
-TFIDF_PATH = "tfidf.pkl"
-ENCODER_PATH = "label_encoder.pkl"
 
-model = joblib.load(MODEL_PATH)
-tfidf = joblib.load(TFIDF_PATH)
-label_encoder = joblib.load(ENCODER_PATH)
+  
+    import joblib
+    import os
+
+    st.write("Current files:", os.listdir("."))
+
+    MODEL_PATH = "model.pkl"
+    TFIDF_PATH = "tfidf.pkl"
+    ENCODER_PATH = "label_encoder.pkl"
+
+    model = joblib.load(MODEL_PATH)
+    tfidf = joblib.load(TFIDF_PATH)
+    label_encoder = joblib.load(ENCODER_PATH)
+
 except Exception as e:
     st.error(f"Error loading models: {e}")
     st.stop()
