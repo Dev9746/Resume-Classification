@@ -375,18 +375,14 @@ if predict_btn:
                 value=f"{confidence:.1f}%"
             )
 
-        with col_b:
-
-            # Gauge meter code yahan rahega
-            pass
+       
 
         # ==================================================
         # PREDICTION CARD
         # ==================================================
-```python
-col_a, col_b = st.columns([2, 1])
+      col_a, col_b = st.columns([2, 1])
 
-with col_a:
+        with col_a:
 
     st.info("🎯 Predicted Job Category")
 
@@ -397,7 +393,7 @@ with col_a:
         value=f"{confidence:.1f}%"
     )
 
-with col_b:
+        with col_b:
 
     fig, ax = plt.subplots(figsize=(3, 3))
 
@@ -437,7 +433,9 @@ with col_b:
     st.pyplot(fig)
 
     plt.close(fig)
-```
+
+
+
    
    
 
