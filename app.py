@@ -67,18 +67,16 @@ st.markdown("""
 # ─────────────────────────────────────────────
 # LOAD MODELS
 # ─────────────────────────────────────────────
-MODELS_DIR   = "."
+MODELS_DIR = "."
+
 MODEL_PATH = "model.pkl"
 TFIDF_PATH = "tfidf.pkl"
 ENCODER_PATH = "label_encoder.pkl"
 
-@st.cache_resource
-def load_models():
-    """Load and cache all ML artifacts (runs only once per session)."""
-   model = joblib.load(MODEL_PATH)
+model = joblib.load(MODEL_PATH)
 tfidf = joblib.load(TFIDF_PATH)
 label_encoder = joblib.load(ENCODER_PATH)
-    return model, tfidf, le
+    
 
 
 # ─────────────────────────────────────────────
