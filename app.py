@@ -383,8 +383,9 @@ if predict_btn:
         # ==================================================
         # PREDICTION CARD
         # ==================================================
-       
+```python
 col_a, col_b = st.columns([2, 1])
+
 with col_a:
 
     st.info("🎯 Predicted Job Category")
@@ -396,65 +397,50 @@ with col_a:
         value=f"{confidence:.1f}%"
     )
 
-        # ==================================================
-        # CONFIDENCE GAUGE
-        # ==================================================
-  with col_b:
+with col_b:
 
-            fig, ax = plt.subplots(
-                figsize=(3, 3)
-            )
+    fig, ax = plt.subplots(figsize=(3, 3))
 
-            gauge_color = (
-                "#2ecc71"
-                if confidence >= 70
-                else "#f39c12"
-                if confidence >= 40
-                else "#e74c3c"
-            )
+    gauge_color = (
+        "#2ecc71"
+        if confidence >= 70
+        else "#f39c12"
+        if confidence >= 40
+        else "#e74c3c"
+    )
 
-            ax.pie(
-                [confidence, 100 - confidence],
-                colors=[
-                    gauge_color,
-                    "#ecf0f1"
-                ],
-                startangle=90,
-                counterclock=False
-            )
+    ax.pie(
+        [confidence, 100 - confidence],
+        colors=[gauge_color, "#ecf0f1"],
+        startangle=90,
+        counterclock=False
+    )
 
-            ax.add_patch(
-                plt.Circle(
-                    (0, 0),
-                    0.65,
-                    color="white"
-                )
-            )
+    ax.add_patch(
+        plt.Circle((0, 0), 0.65, color="white")
+    )
 
-            ax.text(
-                0,
-                0,
-                f"{confidence:.0f}%",
-                ha="center",
-                va="center",
-                fontsize=22,
-                fontweight="bold",
-                color=gauge_color,
-            )
+    ax.text(
+        0,
+        0,
+        f"{confidence:.0f}%",
+        ha="center",
+        va="center",
+        fontsize=22,
+        fontweight="bold",
+        color=gauge_color,
+    )
 
-            ax.set_title(
-                "Confidence",
-                fontsize=10
-            )
+    ax.set_title("Confidence")
+    ax.axis("equal")
 
-            ax.axis("equal")
+    st.pyplot(fig)
 
-            st.pyplot(
-                fig,
-                use_container_width=False
-            )
+    plt.close(fig)
+```
+   
+   
 
-            plt.close(fig)
 
         # ==================================================
         # TOP 10 CATEGORY PROBABILITIES
