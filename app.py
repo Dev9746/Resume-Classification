@@ -49,21 +49,6 @@ st.markdown("""
     margin-bottom: 30px;
 }
 
-.prediction-box {
-    background-color: #e8f4f8;
-    border-left: 6px solid #1f4e79;
-    padding: 20px;
-    border-radius: 10px;
-}
-
-.confidence-badge {
-    background-color: #2ecc71;
-    color: white;
-    padding: 6px 14px;
-    border-radius: 20px;
-    font-weight: bold;
-}
-
 .stTextArea textarea {
     font-size: 15px;
 }
@@ -381,40 +366,19 @@ if predict_btn:
         # ==================================================
         # PREDICTION CARD
         # ==================================================
-        col_a, col_b = st.columns([2, 1])
+       
+col_a, col_b = st.columns([2, 1])
 
-        with col_a:
+with col_a:
 
-            st.markdown(
-                f"""
-                <div class="prediction-box">
+    st.info("🎯 Predicted Job Category")
 
-                    <h3 style="margin:0;
-                               color:#1f4e79;">
+    st.success(f"💼 {category}")
 
-                        Predicted Job Category
-
-                    </h3>
-
-                    <h1 style="margin:5px 0;
-                               color:#2c3e50;">
-
-                        💼 {category}
-
-                    </h1>
-
-                    <span class="confidence-badge">
-
-                        Confidence:
-                        {confidence:.1f}%
-
-                    </span>
-
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
+    st.metric(
+        label="Confidence",
+        value=f"{confidence:.1f}%"
+    )
 
         # ==================================================
         # CONFIDENCE GAUGE
@@ -647,3 +611,11 @@ if predict_btn:
                 "🧠 Unique Words",
                 unique_word_count
             )
+# ==========================================================
+# FOOTER
+# ==========================================================
+st.markdown("---")
+
+st.caption(
+    "Resume Classifier • Built with Streamlit & scikit-learn • Internship Project"
+)
