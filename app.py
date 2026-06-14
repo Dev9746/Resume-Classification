@@ -347,8 +347,7 @@ if predict_btn:
         )
 
     else:
-
-        with st.spinner(
+with st.spinner(
             "🤖 Analysing Resume..."
         ):
 
@@ -368,7 +367,6 @@ if predict_btn:
         # ==================================================
        
 col_a, col_b = st.columns([2, 1])
-
 with col_a:
 
     st.info("🎯 Predicted Job Category")
