@@ -347,7 +347,8 @@ if predict_btn:
         )
 
     else:
-with st.spinner(
+
+        with st.spinner(
             "🤖 Analysing Resume..."
         ):
 
@@ -361,6 +362,23 @@ with st.spinner(
             "## 🎯 Prediction Results"
         )
 
+        col_a, col_b = st.columns([2, 1])
+
+        with col_a:
+
+            st.info("🎯 Predicted Job Category")
+
+            st.success(f"💼 {category}")
+
+            st.metric(
+                label="Confidence",
+                value=f"{confidence:.1f}%"
+            )
+
+        with col_b:
+
+            # Gauge meter code yahan rahega
+            pass
 
         # ==================================================
         # PREDICTION CARD
