@@ -380,18 +380,7 @@ if predict_btn:
         # ==================================================
         # PREDICTION CARD
         # ==================================================
-      col_a, col_b = st.columns([2, 1])
-
-        with col_a:
-
-    st.info("🎯 Predicted Job Category")
-
-    st.success(f"💼 {category}")
-
-    st.metric(
-        label="Confidence",
-        value=f"{confidence:.1f}%"
-    )
+      
 
         with col_b:
 
