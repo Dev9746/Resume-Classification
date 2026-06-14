@@ -399,7 +399,7 @@ with col_a:
         # ==================================================
         # CONFIDENCE GAUGE
         # ==================================================
-        with col_b:
+  with col_b:
 
             fig, ax = plt.subplots(
                 figsize=(3, 3)
