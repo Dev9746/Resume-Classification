@@ -1,7 +1,6 @@
 """
 =============================================================
-  Resume Classifier - Professional Version
-  Part 1: Setup + UI + Model Loading
+  app.py — Streamlit UI for Resume Classification
 =============================================================
 """
 
@@ -16,10 +15,9 @@ import matplotlib.patches as mpatches
 from PyPDF2 import PdfReader
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 
-
-# ==========================================================
+# ==================================================
 # PAGE CONFIG
-# ==========================================================
+# ==================================================
 st.set_page_config(
     page_title="Resume Classifier",
     page_icon="📄",
@@ -27,19 +25,18 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
-
-# ==========================================================
+# ==================================================
 # CUSTOM CSS
-# ==========================================================
+# ==================================================
 st.markdown("""
 <style>
 
 .main-header {
-    font-size: 2.6rem;
+    font-size: 2.5rem;
     font-weight: 700;
     color: #1f4e79;
     text-align: center;
-    margin-bottom: 0;
+    padding: 10px 0 5px 0;
 }
 
 .sub-header {
@@ -50,16 +47,15 @@ st.markdown("""
 }
 
 .stTextArea textarea {
-    font-size: 15px;
+    font-size: 0.92rem;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-
-# ==========================================================
-# HEADER
-# ==========================================================
+# ==================================================
+# PAGE HEADER
+# ==================================================
 st.markdown(
     '<p class="main-header">📄 Resume Classifier</p>',
     unsafe_allow_html=True
@@ -69,13 +65,12 @@ st.markdown(
     '<p class="sub-header">'
     'Paste your resume below and let AI predict the best-fit job category.'
     '</p>',
-    unsafe_allow_html=True
+    unsafe_allow_html=True,
 )
 
-
-# ==========================================================
+# ==================================================
 # SIDEBAR
-# ==========================================================
+# ==================================================
 with st.sidebar:
 
     st.image(
@@ -83,11 +78,12 @@ with st.sidebar:
         width=70
     )
 
-    st.markdown("## 📘 About This App")
+    st.markdown("## 📘 About this App")
 
     st.info(
-        "This app classifies resumes into job categories "
-        "using NLP and Machine Learning."
+        "This app classifies resumes into one of "
+        "**25 job categories** using NLP and "
+        "Machine Learning."
     )
 
     st.markdown("### 🗂️ Supported Categories")
@@ -120,33 +116,26 @@ with st.sidebar:
         "Operations Manager",
     ]
 
-    for cat in categories:
-        st.markdown(f"• {cat}")
+    for category in categories:
+        st.markdown(f"• {category}")
 
     st.markdown("---")
 
     st.markdown(
-        """
-        **Model:** Logistic Regression / Naive Bayes
-        
-        **Features:** TF-IDF
-        
-        **Dataset:** Kaggle Resume Dataset
-        """
+        "**Model:** Trained on Kaggle Resume Dataset\n\n"
+        "**Features:** TF-IDF + Machine Learning"
     )
 
-
-# ==========================================================
+# ==================================================
 # MODEL PATHS
-# ==========================================================
+# ==================================================
 MODEL_PATH = "model.pkl"
 TFIDF_PATH = "tfidf.pkl"
 ENCODER_PATH = "label_encoder.pkl"
 
-
-# ==========================================================
-# CHECK FILES EXIST
-# ==========================================================
+# ==================================================
+# CHECK MODEL FILES
+# ==================================================
 if not (
     os.path.exists(MODEL_PATH)
     and os.path.exists(TFIDF_PATH)
@@ -154,14 +143,19 @@ if not (
 ):
     st.error(
         "❌ Model files not found.\n\n"
-        f"Current files: {os.listdir('.')}"
+        "Please upload:\n"
+        "- model.pkl\n"
+        "- tfidf.pkl\n"
+        "- label_encoder.pkl"
     )
+
+    st.write("Current Files:", os.listdir("."))
+
     st.stop()
 
-
-# ==========================================================
-# LOAD MODELS (CACHED)
-# ==========================================================
+# ==================================================
+# LOAD MODELS
+# ==================================================
 @st.cache_resource
 def load_models():
 
@@ -183,79 +177,50 @@ except Exception as e:
     st.error(f"Error loading models: {e}")
 
     st.stop()
-
-
-# ==========================================================
-# PDF RESUME UPLOAD
-# ==========================================================
-uploaded_file = st.file_uploader(
-    "📄 Upload Resume PDF (Optional)",
-    type=["pdf"]
-)
-
-resume_input = ""
-
-if uploaded_file:
-
-    try:
-
-        reader = PdfReader(uploaded_file)
-
-        pdf_text = ""
-
-        for page in reader.pages:
-
-            text = page.extract_text()
-
-            if text:
-                pdf_text += text + "\n"
-
-        resume_input = pdf_text
-
-        st.success("✅ PDF uploaded successfully.")
-
-    except Exception as e:
-
-        st.error(f"Unable to read PDF: {e}")
-
-
-# ==========================================================
+  
+  # ==================================================
 # TEXT CLEANING
-# ==========================================================
+# ==================================================
 def clean_text(text):
 
     text = text.lower()
 
+    # Remove URLs
     text = re.sub(
         r"http\S+|www\S+|https\S+",
         " ",
         text
     )
 
+    # Remove Emails
     text = re.sub(
         r"\S+@\S+",
         " ",
         text
     )
 
+    # Remove Phone Numbers
     text = re.sub(
         r"\b(\+?\d[\d\s\-().]{7,}\d)\b",
         " ",
         text
     )
 
+    # Keep only alphabets
     text = re.sub(
         r"[^a-z\s]",
         " ",
         text
     )
 
+    # Remove extra spaces
     text = re.sub(
         r"\s+",
         " ",
         text
     ).strip()
 
+    # Remove stopwords
     tokens = [
         word
         for word in text.split()
@@ -265,9 +230,10 @@ def clean_text(text):
 
     return " ".join(tokens)
 
-# ==========================================================
+
+# ==================================================
 # PREDICTION FUNCTION
-# ==========================================================
+# ==================================================
 def predict_resume(text):
 
     cleaned = clean_text(text)
@@ -295,28 +261,72 @@ def predict_resume(text):
         )
     )
 
-    return category, confidence, all_probs
+    return (
+        category,
+        confidence,
+        all_probs,
+    )
 
 
-# ==========================================================
+# ==================================================
+# PDF UPLOAD
+# ==================================================
+st.markdown("## 📂 Upload Resume")
+
+uploaded_file = st.file_uploader(
+    "Upload Resume PDF",
+    type=["pdf"]
+)
+
+resume_input = ""
+
+if uploaded_file is not None:
+
+    try:
+
+        pdf = PdfReader(uploaded_file)
+
+        extracted_text = ""
+
+        for page in pdf.pages:
+
+            page_text = page.extract_text()
+
+            if page_text:
+                extracted_text += page_text + "\n"
+
+        resume_input = extracted_text
+
+        st.success(
+            "✅ PDF uploaded successfully."
+        )
+
+    except Exception as e:
+
+        st.error(
+            f"Error reading PDF: {e}"
+        )
+
+
+# ==================================================
 # RESUME INPUT
-# ==========================================================
+# ==================================================
 resume_input = st.text_area(
     "📝 Paste Resume Text Here",
-    height=300,
     value=resume_input,
+    height=300,
     placeholder=(
-        "Example:\n\n"
-        "Skills: Python, Machine Learning, SQL, NLP...\n"
-        "Experience: Data Scientist at XYZ Company...\n"
-        "Education: B.Tech Computer Science...\n"
-    )
+        "Example:\n"
+        "Skills: Python, Machine Learning, SQL...\n"
+        "Experience: 3 years as Data Scientist...\n"
+        "Education: B.Tech Computer Science..."
+    ),
 )
 
 
-# ==========================================================
-# CENTERED BUTTON
-# ==========================================================
+# ==================================================
+# PREDICT BUTTON
+# ==================================================
 col1, col2, col3 = st.columns([1, 2, 1])
 
 with col2:
@@ -326,17 +336,15 @@ with col2:
         use_container_width=True,
         type="primary"
     )
-
-
-# ==========================================================
-# PREDICTION RESULT
-# ==========================================================
+  # ==================================================
+# PREDICTION RESULTS
+# ==================================================
 if predict_btn:
 
     if not resume_input.strip():
 
         st.warning(
-            "⚠️ Please paste some resume text."
+            "⚠️ Please paste resume text."
         )
 
     elif len(resume_input.strip().split()) < 10:
@@ -362,6 +370,9 @@ if predict_btn:
             "## 🎯 Prediction Results"
         )
 
+        # ==========================================
+        # Prediction + Gauge Meter
+        # ==========================================
         col_a, col_b = st.columns([2, 1])
 
         with col_a:
@@ -375,96 +386,97 @@ if predict_btn:
                 value=f"{confidence:.1f}%"
             )
 
-       
-
-        # ==================================================
-        # PREDICTION CARD
-        # ==================================================
-      
-
         with col_b:
 
-    fig, ax = plt.subplots(figsize=(3, 3))
+            fig, ax = plt.subplots(
+                figsize=(3, 3)
+            )
 
-    gauge_color = (
-        "#2ecc71"
-        if confidence >= 70
-        else "#f39c12"
-        if confidence >= 40
-        else "#e74c3c"
-    )
+            gauge_color = (
+                "#2ecc71"
+                if confidence >= 70
+                else "#f39c12"
+                if confidence >= 40
+                else "#e74c3c"
+            )
 
-    ax.pie(
-        [confidence, 100 - confidence],
-        colors=[gauge_color, "#ecf0f1"],
-        startangle=90,
-        counterclock=False
-    )
+            ax.pie(
+                [confidence, 100 - confidence],
+                colors=[
+                    gauge_color,
+                    "#ecf0f1"
+                ],
+                startangle=90,
+                counterclock=False,
+            )
 
-    ax.add_patch(
-        plt.Circle((0, 0), 0.65, color="white")
-    )
+            ax.add_patch(
+                plt.Circle(
+                    (0, 0),
+                    0.65,
+                    color="white"
+                )
+            )
 
-    ax.text(
-        0,
-        0,
-        f"{confidence:.0f}%",
-        ha="center",
-        va="center",
-        fontsize=22,
-        fontweight="bold",
-        color=gauge_color,
-    )
+            ax.text(
+                0,
+                0,
+                f"{confidence:.0f}%",
+                ha="center",
+                va="center",
+                fontsize=22,
+                fontweight="bold",
+                color=gauge_color,
+            )
 
-    ax.set_title("Confidence")
-    ax.axis("equal")
+            ax.set_title(
+                "Confidence"
+            )
 
-    st.pyplot(fig)
+            ax.axis("equal")
 
-    plt.close(fig)
+            st.pyplot(fig)
 
+            plt.close(fig)
 
-
-   
-   
-
-
-        # ==================================================
-        # TOP 10 CATEGORY PROBABILITIES
-        # ==================================================
-        st.markdown("### 📊 Top 10 Category Probabilities")
+        # ==========================================
+        # TOP 10 PROBABILITIES
+        # ==========================================
+        st.markdown(
+            "### 📊 Top 10 Category Probabilities"
+        )
 
         top10 = dict(
             list(all_probs.items())[:10]
         )
 
-        df_probs = pd.DataFrame({
-            "Category": list(top10.keys()),
-            "Probability (%)": [
-                prob * 100
-                for prob in top10.values()
-            ]
-        })
+        df_probs = pd.DataFrame(
+            {
+                "Category": list(
+                    top10.keys()
+                ),
+                "Probability (%)": [
+                    v * 100
+                    for v in top10.values()
+                ],
+            }
+        )
 
-
-        # ==================================================
-        # BAR CHART
-        # ==================================================
         fig2, ax2 = plt.subplots(
             figsize=(10, 5)
         )
 
         bar_colors = [
             "#1f4e79"
-            if category_name == category
+            if c == category
             else "#aed6f1"
-            for category_name in df_probs["Category"]
+            for c in df_probs["Category"]
         ]
 
         bars = ax2.barh(
             df_probs["Category"],
             df_probs["Probability (%)"],
-            color=bar_colors
+            color=bar_colors,
         )
 
         ax2.set_xlabel(
@@ -473,45 +485,38 @@ if predict_btn:
 
         ax2.set_title(
             "Top 10 Predicted Categories",
-            fontweight="bold"
+            fontweight="bold",
         )
 
         ax2.invert_yaxis()
 
-
-        # Add probability labels
         for bar in bars:
 
             width = bar.get_width()
 
             ax2.text(
                 width + 0.3,
-                bar.get_y() + bar.get_height() / 2,
+                bar.get_y()
+                + bar.get_height() / 2,
                 f"{width:.1f}%",
                 va="center",
-                fontsize=9
+                fontsize=9,
             )
 
-
-        # ==================================================
-        # LEGEND
-        # ==================================================
         legend_handles = [
-
             mpatches.Patch(
                 color="#1f4e79",
-                label="Top Prediction"
+                label="Top Prediction",
             ),
-
             mpatches.Patch(
                 color="#aed6f1",
-                label="Other Categories"
+                label="Other Categories",
             ),
         ]
 
         ax2.legend(
             handles=legend_handles,
-            loc="lower right"
+            loc="lower right",
         )
 
         plt.tight_layout()
@@ -520,45 +525,37 @@ if predict_btn:
 
         plt.close(fig2)
 
-
-        # ==================================================
+        # ==========================================
         # FULL PROBABILITY TABLE
-        # ==================================================
+        # ==========================================
         with st.expander(
             "📋 View All Category Probabilities"
         ):
 
-            df_all = pd.DataFrame({
-
-                "Rank":
-                    range(
+            df_all = pd.DataFrame(
+                {
+                    "Rank": range(
                         1,
-                        len(all_probs) + 1
+                        len(all_probs) + 1,
                     ),
-
-                "Category":
-                    list(all_probs.keys()),
-
-                "Probability (%)":
-                    [
-                        f"{prob*100:.2f}%"
-                        for prob in all_probs.values()
-                    ]
-            })
-
-            df_all = df_all.set_index(
-                "Rank"
-            )
+                    "Category": list(
+                        all_probs.keys()
+                    ),
+                    "Probability (%)": [
+                        f"{v*100:.2f}%"
+                        for v in all_probs.values()
+                    ],
+                }
+            ).set_index("Rank")
 
             st.dataframe(
                 df_all,
-                use_container_width=True
+                use_container_width=True,
             )
 
-
-        # ==================================================
+        # ==========================================
         # RESUME STATISTICS
-        # ==================================================
+        # ==========================================
         st.markdown(
             "### 📝 Resume Statistics"
         )
@@ -567,7 +564,7 @@ if predict_btn:
             resume_input.split()
         )
 
-        character_count = len(
+        char_count = len(
             resume_input
         )
 
@@ -577,32 +574,32 @@ if predict_btn:
             )
         )
 
-
         col_s1, col_s2, col_s3 = st.columns(3)
 
         with col_s1:
 
             st.metric(
                 "📝 Word Count",
-                word_count
+                word_count,
             )
 
         with col_s2:
 
             st.metric(
-                "🔤 Character Count",
-                character_count
+                "🔠 Character Count",
+                char_count,
             )
 
         with col_s3:
 
             st.metric(
                 "🧠 Unique Words",
-                unique_word_count
+                unique_word_count,
             )
-# ==========================================================
+
+# ==================================================
 # FOOTER
-# ==========================================================
+# ==================================================
 st.markdown("---")
 
 st.caption(
