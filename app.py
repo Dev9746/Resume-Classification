@@ -72,7 +72,8 @@ MODELS_DIR = "."
 MODEL_PATH = "model.pkl"
 TFIDF_PATH = "tfidf.pkl"
 ENCODER_PATH = "label_encoder.pkl"
-
+import os
+st.write("Current files:", os.listdir("."))
 model = joblib.load(MODEL_PATH)
 tfidf = joblib.load(TFIDF_PATH)
 label_encoder = joblib.load(ENCODER_PATH)
